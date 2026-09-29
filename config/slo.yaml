@@ -7,7 +7,18 @@ primary_slo:
     total_event: 'event == "request_received"'
   target_percent: 99.5
   error_budget_percent: 0.5
-  note: Học viên phải giải thích hoặc điều chỉnh ngưỡng bằng baseline của mình.
+  note: >-
+    Giu nguyen 3000 ms. Baseline do duoc: latency P95 ~152 ms, TTFT P95 ~50 ms
+    (fake LLM ~150 ms, retrieval ~0 ms), tuc con du ~20x headroom cho LLM that.
+    Nguong 3000 ms van bat duoc su co rag_slow (retrieval +2500 ms -> request
+    ~2650 ms, sat nguong, va vuot nguong khi co request xep hang dong thoi).
+    Request loi (request_failed) khong co response_sent nen cung tieu error budget.
+  error_budget:
+    formula: 'budget = (1 - 0.995) * total_requests_28d'
+    example: '10,000 requests / 28d -> toi da 50 request cham (>3000 ms) hoac loi'
+    burn_rate_alert: >-
+      Burn rate = ti le bad events / 0.5%. Vi du error rate 2% trong 5 phut
+      = burn rate 4x -> neu keo dai, budget 28 ngay can trong ~7 ngay.
 guardrails:
   error_rate_pct_max: 2
   daily_cost_usd_max: 2.5

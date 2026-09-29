@@ -36,6 +36,13 @@ def get_langfuse_client():
     return get_client()
 
 
+def update_generation(client: Any, **kwargs: Any) -> None:
+    """Cap nhat generation hien tai neu client ho tro (client gia trong test co the khong co)."""
+    update = getattr(client, "update_current_generation", None)
+    if callable(update):
+        update(**kwargs)
+
+
 def tracing_enabled() -> bool:
     return LANGFUSE_SDK_AVAILABLE and bool(
         os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY")

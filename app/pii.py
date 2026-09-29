@@ -3,19 +3,24 @@ from __future__ import annotations
 import hashlib
 import re
 
+# Thu tu quan trong: the (16 so) truoc CCCD (12 so) va SDT de chuoi so dai khong bi cat do.
 PII_PATTERNS: dict[str, str] = {
-    "email": r"[\w\.-]+@[\w\.-]+\.\w+",
+    "email": r"[\w\.+-]+@[\w\.-]+\.\w+",
+    "credit_card": r"(?<!\d)\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}(?!\d)",
+    "cccd": r"(?<!\d)\d{12}(?!\d)",
     "phone_vn": r"(?<!\d)(?:\+84|0)(?:[ .-]?\d){9}(?!\d)",
-    "cccd": r"\b\d{12}\b",
-    "credit_card": r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b",
-    # TODO: Add more patterns (e.g., Passport, Vietnamese address keywords)
+    # Ho chieu VN: 1 chu cai in hoa + 7 chu so (vd C1234567).
+    "passport": r"\b[A-Z]\d{7}\b",
+    # Dia chi: so nha + tu khoa duong/pho/phuong/quan (co dau hoac khong dau).
+    "address_vn": r"(?i)\b(?:so\s+)?\d{1,4}[A-Za-z]?(?:/\d{1,4})?\s+(?:đường|duong|phố|pho|ngõ|ngo|hẻm|hem)\s+[^\d,.;\n]{2,40}",
 }
+_COMPILED = {name: re.compile(pattern) for name, pattern in PII_PATTERNS.items()}
 
 
 def scrub_text(text: str) -> str:
     safe = text
-    for name, pattern in PII_PATTERNS.items():
-        safe = re.sub(pattern, f"[REDACTED_{name.upper()}]", safe)
+    for name, pattern in _COMPILED.items():
+        safe = pattern.sub(f"[REDACTED_{name.upper()}]", safe)
     return safe
 
 

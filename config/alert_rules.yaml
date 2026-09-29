@@ -1,25 +1,33 @@
+# Ba alert symptom-based: do tren trieu chung nguoi dung/SLO (cham, loi, chi phi),
+# khong dua vao ten implementation noi bo. Nguon: data/logs.jsonl (xem config/dashboard.yaml).
 alerts:
-  - name: TODO_alert_1
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: chat_latency_p95_slo_breach
+    severity: P2-high
+    condition: 'p95(latency_ms where event == "response_sent") > 3000 ms'
+    duration: 5m
     type: symptom-based
     channel: slack
-    owner: TODO
+    slack_channel: '#day13-llmops-oncall'
+    owner: DoQuangVinh (LLM platform on-call)
+    slo: fast_successful_requests (99.5% requests <= 3000 ms / 28d)
     runbook: docs/alerts.md#alert-1
-  - name: TODO_alert_2
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: chat_error_rate_high
+    severity: P1-critical
+    condition: 'count(event == "request_failed") / count(event == "request_received") * 100 > 2 %'
+    duration: 5m
     type: symptom-based
     channel: slack
-    owner: TODO
+    slack_channel: '#day13-llmops-oncall'
+    owner: DoQuangVinh (LLM platform on-call)
+    slo: error_rate_pct_max 2 (guardrail trong config/slo.yaml)
     runbook: docs/alerts.md#alert-2
-  - name: TODO_alert_3
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: llm_cost_burn_rate_high
+    severity: P3-medium
+    condition: 'sum(cost_usd where event == "response_sent") over 1h * 24 > 2.5 USD (projected daily cost)'
+    duration: 15m
     type: symptom-based
     channel: slack
-    owner: TODO
+    slack_channel: '#day13-llmops-cost'
+    owner: DoQuangVinh (LLM platform on-call)
+    slo: daily_cost_usd_max 2.5 (guardrail trong config/slo.yaml)
     runbook: docs/alerts.md#alert-3
